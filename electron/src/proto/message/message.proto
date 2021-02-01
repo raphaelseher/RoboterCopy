@@ -9,7 +9,9 @@ import "google/protobuf/empty.proto";
 service Clipboard {
     rpc GetServerInformation(google.protobuf.Empty) returns (ServerInformation) {}
     rpc StreamOutClipboard(Register) returns (stream Clipping) {}
+    rpc CancelStreamOutClipboard(Register) returns (google.protobuf.Empty) {}
     rpc StreamInClipboard(stream Clipping) returns (google.protobuf.Empty) {}
+
 }
 
 message ServerInformation {

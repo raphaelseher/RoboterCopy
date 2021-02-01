@@ -8,7 +8,7 @@ import IClipboardProvider from '../data/clipboardProvider';
 export class ClipboardHandler implements IClipboardServer {
   peers: Map<String, grpc.ServerWritableStream<Register, Clipping>>;
 
-  constructor(protected provider: IClipboardProvider) {
+  constructor(protected provider: IClipboardProvider, protected peersChangedCallback: (peers: string[]) => void) {
     this.peers = new Map<string, grpc.ServerWritableStream<Register, Clipping>>();
 
     provider.clippingsListeners.push(this.clippingsListener);
@@ -49,33 +49,8 @@ export class ClipboardHandler implements IClipboardServer {
   ): void => {
     const clientRegister = call.request as Register;
     this.peers.set(clientRegister.getName(), call);
+    this.peersChangedCallback(Array.from(this.peers.keys()) as string[]);
   }
-
-  /*
-  clipboardStream = (call: grpc.ServerDuplexStream<Clipping, Clipping>) => {
-    this.provider.clippingsCallback = (clippings: string[]) => {
-      console.log('[clipboardStream] peers: ');
-      const reply = new Clipping();
-      reply.setContent(clippings.join(','));
-
-      this.peers.forEach((call, key) => {
-        call.write(reply);
-      });
-    };
-
-    call.on('data', (request: Clipping) => {
-      console.log(`[clipboardStream] Got: ${JSON.stringify(request.toObject())}`);
-      console.log(`[clipboardStream] Got MetaData: ${JSON.stringify(call.metadata)}`);
-
-      this.peers.set(request.getContent(), call);
-    });
-    call.on('end', () => {
-      console.log('[clipboardStream] Done.');
-      call.end();
-    });
-  };
-  */
-
 }
 
 export default ClipboardHandler;

@@ -87,7 +87,12 @@ const startServer = () => {
     }
     appState.serverIsRunning = true;
     propagateAppState();
-  });
+  }, peersChanged);
+};
+
+const peersChanged = (peers: string[]) => {
+  appState.connectedDevices = peers;
+  propagateAppState();
 };
 
 /// ipc interaction
