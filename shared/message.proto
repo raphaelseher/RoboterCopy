@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package RoboterCopy;
+
+option java_package = "com.example.myapplication.Service";
+
+service Clipboard {
+    rpc GetServerInformation(VoidRequest) returns (ServerInformation) {}
+    rpc ClipboardStream(stream Clipping) returns (stream Clipping) {}
+}
+
+message ServerInformation {
+  string name = 1;
+  repeated string ipAddresses = 2;
+  int32 port = 3;
+}
+
+message Clipping {
+    string date = 1;
+    string content = 2;
+}
+
+message RegisterRequest {
+    string name = 1;
+}
+
+message VoidRequest {
+
+}

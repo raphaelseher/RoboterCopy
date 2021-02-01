@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package RoboterCopy;
+
+option java_package = "com.example.myapplication.Service";
+
+// Interface exported by the server.
+service MessageService {
+    rpc GetFeature(RegisterRequest) returns (Message) {}
+    rpc RegisterMessage(RegisterRequest) returns (stream Message) {}
+    rpc MessageStream(stream Message) returns (stream Message) {}
+}
+
+message Message {
+    // The message to be sent.
+    string content = 1;
+}
+
+message RegisterRequest {
+    // The message to be sent.
+    string name = 1;
+}

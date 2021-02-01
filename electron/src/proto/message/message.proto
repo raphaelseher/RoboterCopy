@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package RoboterCopy;
+
+option java_package = "com.example.myapplication.Service";
+
+import "google/protobuf/empty.proto";
+
+service Clipboard {
+    rpc GetServerInformation(google.protobuf.Empty) returns (ServerInformation) {}
+    rpc StreamOutClipboard(Register) returns (stream Clipping) {}
+    rpc StreamInClipboard(stream Clipping) returns (google.protobuf.Empty) {}
+}
+
+message ServerInformation {
+  string name = 1;
+  repeated string ipAddresses = 2;
+  int32 port = 3;
+}
+
+message Clipping {
+    string date = 1;
+    string content = 2;
+}
+
+message Register {
+    string name = 1;
+}
