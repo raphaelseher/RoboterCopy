@@ -4,19 +4,26 @@ package RoboterCopy;
 
 option java_package = "com.example.myapplication.Service";
 
-// Interface exported by the server.
-service MessageService {
-    rpc GetFeature(RegisterRequest) returns (Message) {}
-    rpc RegisterMessage(RegisterRequest) returns (stream Message) {}
-    rpc MessageStream(stream Message) returns (stream Message) {}
+import "google/protobuf/empty.proto";
+
+service Clipboard {
+    rpc GetServerInformation(google.protobuf.Empty) returns (ServerInformation) {}
+    rpc StreamOutClipboard(Register) returns (stream Clipping) {}
+    rpc StreamInClipboard(stream Clipping) returns (google.protobuf.Empty) {}
+
 }
 
-message Message {
-    // The message to be sent.
-    string content = 1;
+message ServerInformation {
+  string name = 1;
+  repeated string ipAddresses = 2;
+  int32 port = 3;
 }
 
-message RegisterRequest {
-    // The message to be sent.
+message Clipping {
+    string date = 1;
+    string content = 2;
+}
+
+message Register {
     string name = 1;
 }
