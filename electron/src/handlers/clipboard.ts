@@ -8,15 +8,18 @@ import IClipboardProvider from '../data/clipboardProvider';
 export class ClipboardHandler implements IClipboardServer {
   peers: Map<String, grpc.ServerWritableStream<Register, Clipping>>;
 
-  constructor(protected provider: IClipboardProvider, protected peersChangedCallback: (peers: string[]) => void) {
+  constructor(protected provider: IClipboardProvider,
+    protected peersChangedCallback: (peers: string[]) => void) {
     this.peers = new Map<string, grpc.ServerWritableStream<Register, Clipping>>();
-
     provider.clippingsListeners.push(this.clippingsListener);
   }
 
   clippingsListener = (clippings: string[]) => {
     const lastClip = new Clipping();
     lastClip.setContent(clippings[clippings.length - 1]);
+
+    console.log('[ClipboardHandler] send clipping: ', lastClip.getContent());
+    console.log('[ClipboardHandler] to ', this.peers.keys);
     this.peers.forEach(call => {
       call.write(lastClip);
     });
