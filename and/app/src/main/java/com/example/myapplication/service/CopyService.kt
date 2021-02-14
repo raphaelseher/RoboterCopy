@@ -39,12 +39,8 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val pendingIntent: PendingIntent =
-            Intent(this, MainActivity::class.java).let { notificationIntent ->
-                PendingIntent.getActivity(this, 0, notificationIntent, 0)
-            }
-
-        startForeground(ONGOING_NOTIFICATION_ID, createNotification(pendingIntent))
+        startForeground(ONGOING_NOTIFICATION_ID, createNotification("Disconnected",
+            R.drawable.ic_notification_disconnected))
         return START_STICKY;
     }
 
@@ -53,7 +49,11 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
         super.onDestroy()
     }
 
-    private fun createNotification(pendingIntent: PendingIntent): Notification {
+    private fun createNotification(title: String, icon: Int): Notification {
+        val pendingIntent = Intent(this, MainActivity::class.java).let {
+            PendingIntent.getActivity(this, 0, it, 0)
+        }
+
         val channel = NotificationChannel(SERVICE_NOTIFICATION_CHANNEL_ID, "RoboCopy",
             NotificationManager.IMPORTANCE_LOW)
         channel.description = "Foreground Service Notification Channel"
@@ -61,19 +61,32 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
 
+        // TODO: `setAction` for Stop & CopyLastAgain
         return Notification.Builder(this, SERVICE_NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Not title")
-            .setContentText("Not Message")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(title)
+            .setSmallIcon(icon)
             .setContentIntent(pendingIntent)
-            .setTicker("Ticker?")
+            .setLocalOnly(true)
             .setOngoing(true)
             .setCategory(Notification.CATEGORY_SERVICE)
             .build()
     }
 
+    private fun updateNotification(connected: Boolean) {
+        Log.d(TAG, "UpdateNotification: $connected")
+
+        val title = if (connected) "Connected" else "Disconnected"
+        val icon = if (connected) R.drawable.ic_notification_connected else R.drawable.ic_notification_disconnected
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).also {
+            it.notify(ONGOING_NOTIFICATION_ID, createNotification(title, icon))
+        }
+    }
+
     override fun discoveredServer(info: NsdServiceInfo) {
+        Log.d(TAG, "discoveredServer: ${info.serviceName}")
+
         clipboardHandler = ClipboardHandler(info.host.hostAddress, info.port, this)
+        updateNotification(true)
     }
 
     override fun discoveryFailed(error: Exception) {
