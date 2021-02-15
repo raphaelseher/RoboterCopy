@@ -11,10 +11,6 @@ data class ServerInformation(
 )
 
 class HomeViewModel : ViewModel() {
-    val deviceName = MutableLiveData<String>("-")
+    val deviceName = MutableLiveData<String>()
     val serverInformation = MutableLiveData<ServerInformation>()
-
-    init {
-        deviceName.value = "OnePlus"
-    }
 }

@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
-
     <data>
-
         <variable
             name="viewModel"
             type="com.example.myapplication.screens.home.HomeViewModel" />
     </data>
 
     <ScrollView
+        style="@style/Theme.MyApplication"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <LinearLayout
+                style="@style/Theme.MyApplication.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
                 <TextView
+                    style="@style/Theme.MyApplication.CardTitle"
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:text="@{viewModel.deviceName}" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/standard"
+                    android:text="Device" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -40,6 +42,35 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
+
+            <LinearLayout
+                style="@style/Theme.MyApplication.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/Theme.MyApplication.CardTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/standard"
+                    android:text="Server" />
+            </LinearLayout>
+
+            <LinearLayout
+                style="@style/Theme.MyApplication.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/Theme.MyApplication.CardTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/standard"
+                    android:text="Logs" />
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 </layout>
