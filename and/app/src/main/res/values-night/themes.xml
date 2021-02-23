@@ -18,6 +18,9 @@
 
         <item name="colorCardBackground">@color/light_gray</item>
         <item name="colorOnCardBackground">@color/white</item>
+
+        <item name="serverConnectedIndicatorColor">@color/green_a_400</item>
+        <item name="serverDisconnectedIndicatorColor">@color/red_a_400</item>
     </style>
 
 </resources>

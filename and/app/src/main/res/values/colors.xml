@@ -6,6 +6,10 @@
     <color name="amber_700">#ffa000</color>
     <color name="dark_gray">#474747</color>
     <color name="light_gray">#5F5F5F</color>
+
+    <color name="green_a_400">#76ff03</color>
+    <color name="red_a_400">#ff1744</color>
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

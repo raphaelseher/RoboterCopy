@@ -38,5 +38,19 @@
     <style name="Theme.MyApplication.CardTitle">
         <item name="android:textSize">20sp</item>
         <item name="android:textColor">?attr/colorOnCardBackground</item>
+        <item name="android:fontFamily">@string/font_fontFamily_medium</item>
+    </style>
+
+    <style name="Theme.MyApplication.CardRow">
+        <item name="android:textColor">?attr/colorOnCardBackground</item>
+    </style>
+
+    <style name="Theme.MyApplication.CardRow.Title">
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@string/font_fontFamily_medium</item>
+    </style>
+
+    <style name="Theme.MyApplication.CardRow.Value">
+        <item name="android:textSize">16sp</item>
     </style>
 </resources>

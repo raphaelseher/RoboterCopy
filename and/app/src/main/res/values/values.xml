@@ -3,5 +3,9 @@
     <declare-styleable name="Theme.MyApplication">
         <attr format="color" name="colorCardBackground"/>
         <attr format="color" name="colorOnCardBackground"/>
+        <attr format="color" name="serverConnectedIndicatorColor"/>
+        <attr format="color" name="serverDisconnectedIndicatorColor"/>
     </declare-styleable>
+
+    <string name="font_fontFamily_medium">sans-serif-medium</string>
 </resources>

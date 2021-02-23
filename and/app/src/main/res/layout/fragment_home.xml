@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
         <variable
             name="viewModel"
@@ -38,6 +39,7 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:lines="1"
                         android:text="@={viewModel.deviceName}" />
 
                 </com.google.android.material.textfield.TextInputLayout>
@@ -49,12 +51,73 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView
-                    style="@style/Theme.MyApplication.CardTitle"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/standard"
-                    android:text="Server" />
+                    android:layout_marginBottom="@dimen/standard">
+
+                    <TextView
+                        style="@style/Theme.MyApplication.CardTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Server"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/view"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <View
+                        android:id="@+id/view"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:background="@drawable/circle_disconnected"
+                        android:elevation="2dp"
+                        android:padding="2dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TextView
+                    style="@style/Theme.MyApplication.CardRow.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="HostName" />
+
+                <TextView
+                    style="@style/Theme.MyApplication.CardRow.Value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/double_standard"
+                    android:text="HostName" />
+
+                <TextView
+                    style="@style/Theme.MyApplication.CardRow.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="IP-Address" />
+
+                <TextView
+                    style="@style/Theme.MyApplication.CardRow.Value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/double_standard"
+                    android:text="IP-Address" />
+
+                <TextView
+                    style="@style/Theme.MyApplication.CardRow.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Port" />
+
+                <TextView
+                    style="@style/Theme.MyApplication.CardRow.Value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/double_standard"
+                    android:text="Port" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -69,6 +132,15 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/standard"
                     android:text="Logs" />
+
+                <TextView
+                    android:background="@color/dark_gray"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="100dp"
+                    android:padding="@dimen/standard"
+                    android:text="Logi di logs"/>
+
             </LinearLayout>
 
         </LinearLayout>
