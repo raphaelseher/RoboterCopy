@@ -16,7 +16,7 @@ sealed class Response<out T, out E> {
 
 class ClipboardHandler(
     address: String, port: Int,
-    private val listener: ClipboardHandler.Listener
+    private val listener: ClipboardHandler.Listener?
 ) {
     class EmptyException : Exception() {}
 
@@ -25,8 +25,12 @@ class ClipboardHandler(
     private val channel = ManagedChannelBuilder.forAddress(address, port).usePlaintext().build()
     private val stub = ClipboardGrpc.newBlockingStub(channel)
 
-    init {
+    fun startListening() {
         GlobalScope.launch { listen() }
+    }
+
+    fun shutdown() {
+        channel.shutdown()
     }
 
     suspend fun getServerInformation(): Message.ServerInformation = suspendCoroutine { cont ->
@@ -36,7 +40,7 @@ class ClipboardHandler(
     private suspend fun listen() {
         val register = Message.Register.newBuilder().setName("OnePlus").build()
         stub.streamOutClipboard(register).forEachRemaining {
-            listener.receivedClip(it)
+            listener?.receivedClip(it)
         }
     }
 

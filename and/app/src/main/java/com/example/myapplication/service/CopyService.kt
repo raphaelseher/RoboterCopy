@@ -9,21 +9,46 @@ import android.os.Binder
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
+import androidx.lifecycle.MutableLiveData
 import com.example.myapplication.MainActivity
 import com.example.myapplication.R
 import com.example.myapplication.Service.Message
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+class CopyServiceManager() {
+    data class Server(
+        val name: String,
+        val discoverdAdress: String,
+        val ipAddress: List<String>,
+        val port: Int)
+
+    interface Listener {
+        fun discoveredServersChanged()
+    }
+
+    val discoveredServers = mutableListOf<Server>()
+    var listener: Listener? = null
+
+    fun addDiscoveredServer(server: Server) {
+        if (discoveredServers.contains(server)) {
+            return
+        }
+
+        discoveredServers.add(server)
+        listener?.discoveredServersChanged()
+    }
+}
 
 class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listener {
     val TAG = this.javaClass.simpleName
 
     inner class CopyBinder: Binder() {
         var receivedClipListener: ((clip: Message.Clipping) -> Unit)? = null
-        fun getClipboardHandler(): ClipboardHandler? = clipboardHandler
+        fun getManager(): CopyServiceManager = manager
     }
 
+    private val manager = CopyServiceManager()
     private var copyBinder = CopyBinder()
     private lateinit var discoveryService: DiscoveryService
     private var clipboardHandler: ClipboardHandler? = null
@@ -82,10 +107,20 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
         }
     }
 
+    private fun resolveServer(host: String, port: Int) = GlobalScope.launch {
+        val tempHandler = ClipboardHandler(host, port, null)
+        tempHandler.getServerInformation().also {
+            manager.addDiscoveredServer(CopyServiceManager.Server(it.name, host, it.ipAddressesList, port))
+        }
+        tempHandler.shutdown()
+    }
+
     override fun discoveredServer(info: NsdServiceInfo) {
         Log.d(TAG, "discoveredServer: ${info.serviceName}")
-
-        clipboardHandler = ClipboardHandler(info.host.hostAddress, info.port, this)
+        resolveServer(info.host.hostAddress, info.port)
+        clipboardHandler = ClipboardHandler(info.host.hostAddress, info.port, this).also {
+            it.startListening()
+        }
         updateNotification(true)
     }
 

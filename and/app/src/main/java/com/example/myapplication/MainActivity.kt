@@ -19,6 +19,7 @@ import com.example.myapplication.Service.Message
 import com.example.myapplication.Service.ClipboardGrpc
 import com.example.myapplication.service.ClipboardHandler
 import com.example.myapplication.service.CopyService
+import com.example.myapplication.service.CopyServiceManager
 import com.google.protobuf.Empty
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
@@ -33,10 +34,9 @@ class MainActivity : AppCompatActivity() {
     private val connection = object: ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             val copyBinder = binder as CopyService.CopyBinder
-            copyBinder.getClipboardHandler()?.let {
-                clipboardHandler = it
-                test()
-            }
+
+            AppEnvironment.copyRepository.copyServiceManager = copyBinder.getManager()
+
             copyBinder.receivedClipListener = {
                 Toast.makeText(baseContext, it.content, Toast.LENGTH_SHORT).show()
             }
@@ -46,7 +46,6 @@ class MainActivity : AppCompatActivity() {
             TODO("Not yet implemented")
         }
     }
-    private lateinit var clipboardHandler: ClipboardHandler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,10 +74,5 @@ class MainActivity : AppCompatActivity() {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    private fun test() = GlobalScope.launch(Dispatchers.Default) {
-        val info = clipboardHandler.getServerInformation()
-        Log.e(TAG, "Test: $info")
     }
 }
