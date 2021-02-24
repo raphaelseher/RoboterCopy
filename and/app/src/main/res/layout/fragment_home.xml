@@ -75,7 +75,7 @@
                         android:id="@+id/view"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
-                        android:background="@drawable/circle_disconnected"
+                        android:background="@{ viewModel.copyRepository.isConnected() ? @drawable/circle_connected : @drawable/circle_disconnected }"
                         android:elevation="2dp"
                         android:padding="2dp"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -108,7 +108,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/double_standard"
-                    android:text="@{viewModel.server.discoverdAdress}" />
+                    android:text="@{viewModel.server.discoveredAddress}" />
 
                 <TextView
                     style="@style/Theme.MyApplication.CardRow.Title"
@@ -131,8 +131,8 @@
                     <com.google.android.material.button.MaterialButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Connect"
-                        android:onClick="@{ () -> presenter.onClickConnect.invoke() }"/>
+                        android:text="@{ viewModel.copyRepository.isConnected ? @string/disconnect : @string/connect }"
+                        android:onClick="@{ () -> presenter.onClickConnect.invoke() }" />
 
                     <com.google.android.material.button.MaterialButton
                         style="@style/Widget.MaterialComponents.Button.TextButton"

@@ -7,13 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.example.myapplication.service.CopyRepository
 import com.example.myapplication.service.CopyServiceManager
 import androidx.lifecycle.MediatorLiveData
-
-data class ServerInformation(
-    val hostname: String,
-    val address: String?,
-    val port: String,
-    val isConnected: Boolean
-)
+import com.example.myapplication.R
 
 class HomeViewModel(
     val copyRepository: CopyRepository
@@ -35,7 +29,10 @@ class HomeViewModel(
     }
 
     fun onClickConnect() {
-        selectedServer.postValue(CopyServiceManager.Server("Hello", "", emptyList(), 0))
+        selectedServer.value = server.value
+
+        val server = selectedServer.value ?: return
+        copyRepository.copyServiceManager?.connectToServer(server)
     }
 
     override fun copyServiceConnected(manager: CopyServiceManager) {

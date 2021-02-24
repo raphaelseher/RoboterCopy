@@ -9,26 +9,37 @@ import android.os.Binder
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
-import androidx.lifecycle.MutableLiveData
 import com.example.myapplication.MainActivity
 import com.example.myapplication.R
 import com.example.myapplication.Service.Message
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlin.properties.Delegates
 
 class CopyServiceManager() {
     data class Server(
         val name: String,
-        val discoverdAdress: String,
+        val discoveredAddress: String,
         val ipAddress: List<String>,
         val port: Int)
 
     interface Listener {
         fun discoveredServersChanged()
+        fun connectionChanged()
+    }
+
+    interface Actions {
+        fun connectServer(server: Server)
+        fun disconnect()
     }
 
     val discoveredServers = mutableListOf<Server>()
     var listener: Listener? = null
+    var actionDelegate: Actions? = null
+    var isConnected: Boolean by Delegates.observable(false) {
+        _, _, _ ->
+        listener?.connectionChanged()
+    }
 
     fun addDiscoveredServer(server: Server) {
         if (discoveredServers.contains(server)) {
@@ -38,9 +49,14 @@ class CopyServiceManager() {
         discoveredServers.add(server)
         listener?.discoveredServersChanged()
     }
+
+    fun connectToServer(server: Server) {
+        actionDelegate?.connectServer(server)
+    }
 }
 
-class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listener {
+class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listener,
+    CopyServiceManager.Actions {
     val TAG = this.javaClass.simpleName
 
     inner class CopyBinder: Binder() {
@@ -48,10 +64,13 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
         fun getManager(): CopyServiceManager = manager
     }
 
-    private val manager = CopyServiceManager()
+    private val manager = CopyServiceManager().also { it.actionDelegate = this }
     private var copyBinder = CopyBinder()
     private lateinit var discoveryService: DiscoveryService
-    private var clipboardHandler: ClipboardHandler? = null
+    private var clipboardHandler: ClipboardHandler? by Delegates.observable(null) {
+        prop, old, new ->
+        manager.isConnected = new != null
+    }
 
     override fun onBind(intent: Intent?): IBinder {
         return copyBinder
@@ -72,6 +91,13 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
     override fun onDestroy() {
         Toast.makeText(baseContext, "Copy Service destroyed", Toast.LENGTH_SHORT).show()
         super.onDestroy()
+    }
+
+    private fun connectToServer(address: String, port: Int) {
+        clipboardHandler = ClipboardHandler(address, port, this).also {
+            it.startListening()
+        }
+        updateNotification(true)
     }
 
     private fun createNotification(title: String, icon: Int): Notification {
@@ -109,19 +135,15 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
 
     private fun resolveServer(host: String, port: Int) = GlobalScope.launch {
         val tempHandler = ClipboardHandler(host, port, null)
-        tempHandler.getServerInformation().also {
-            manager.addDiscoveredServer(CopyServiceManager.Server(it.name, host, it.ipAddressesList, port))
-        }
+        val serverInformation = tempHandler.getServerInformation()
+        manager.addDiscoveredServer(CopyServiceManager.Server(serverInformation.name, host,
+            serverInformation.ipAddressesList, port))
         tempHandler.shutdown()
     }
 
     override fun discoveredServer(info: NsdServiceInfo) {
         Log.d(TAG, "discoveredServer: ${info.serviceName}")
         resolveServer(info.host.hostAddress, info.port)
-        clipboardHandler = ClipboardHandler(info.host.hostAddress, info.port, this).also {
-            it.startListening()
-        }
-        updateNotification(true)
     }
 
     override fun discoveryFailed(error: Exception) {
@@ -130,6 +152,16 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
 
     override fun receivedClip(clip: Message.Clipping) {
         copyBinder.receivedClipListener?.invoke(clip)
+    }
+
+    override fun connectServer(server: CopyServiceManager.Server) {
+        connectToServer(server.discoveredAddress, server.port)
+    }
+
+    override fun disconnect() {
+        // clipboardHandler.channel.shutdown()
+        clipboardHandler = null
+        updateNotification(false)
     }
 
     companion object {

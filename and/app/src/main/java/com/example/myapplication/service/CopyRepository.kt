@@ -9,6 +9,7 @@ class CopyRepository: CopyServiceManager.Listener {
     }
 
     val servers = MutableLiveData<List<CopyServiceManager.Server>>(emptyList())
+    val isConnected = MutableLiveData<Boolean>(false)
 
     val listeners = mutableListOf<Listener>()
     var copyServiceManager: CopyServiceManager? by Delegates.observable(null) { prop, old, new ->
@@ -20,5 +21,9 @@ class CopyRepository: CopyServiceManager.Listener {
 
     override fun discoveredServersChanged() {
         servers.postValue(copyServiceManager?.discoveredServers)
+    }
+
+    override fun connectionChanged() {
+        isConnected.value = copyServiceManager?.isConnected ?: false
     }
 }
