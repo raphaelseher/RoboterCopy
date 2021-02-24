@@ -8,17 +8,16 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import com.example.myapplication.AppEnvironment
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentHomeBinding
+import com.example.myapplication.extensions.deviceName
 import com.example.myapplication.getViewModel
-import com.example.myapplication.service.CopyRepository
 
 class HomeFragment : Fragment() {
 
     private val viewModel: HomeViewModel by lazy {
-        getViewModel { HomeViewModel(AppEnvironment.copyRepository) }
+        getViewModel { HomeViewModel(AppEnvironment.copyRepository, deviceName()) }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

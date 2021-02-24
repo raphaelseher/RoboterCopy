@@ -16,7 +16,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.properties.Delegates
 
-class CopyServiceManager() {
+class CopyServiceManager {
     data class Server(
         val name: String,
         val discoveredAddress: String,
@@ -29,7 +29,7 @@ class CopyServiceManager() {
     }
 
     interface Actions {
-        fun connectServer(server: Server)
+        fun connectServer(server: Server, deviceName: String)
         fun disconnect()
     }
 
@@ -50,8 +50,8 @@ class CopyServiceManager() {
         listener?.discoveredServersChanged()
     }
 
-    fun connectToServer(server: Server) {
-        actionDelegate?.connectServer(server)
+    fun connectToServer(server: Server, deviceName: String) {
+        actionDelegate?.connectServer(server, deviceName)
     }
 }
 
@@ -93,9 +93,9 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
         super.onDestroy()
     }
 
-    private fun connectToServer(address: String, port: Int) {
+    private fun connectToServer(address: String, port: Int, deviceName: String) {
         clipboardHandler = ClipboardHandler(address, port, this).also {
-            it.startListening()
+            it.startListening(deviceName)
         }
         updateNotification(true)
     }
@@ -154,8 +154,8 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
         copyBinder.receivedClipListener?.invoke(clip)
     }
 
-    override fun connectServer(server: CopyServiceManager.Server) {
-        connectToServer(server.discoveredAddress, server.port)
+    override fun connectServer(server: CopyServiceManager.Server, deviceName: String) {
+        connectToServer(server.discoveredAddress, server.port, deviceName)
     }
 
     override fun disconnect() {

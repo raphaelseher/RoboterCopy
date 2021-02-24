@@ -25,8 +25,8 @@ class ClipboardHandler(
     private val channel = ManagedChannelBuilder.forAddress(address, port).usePlaintext().build()
     private val stub = ClipboardGrpc.newBlockingStub(channel)
 
-    fun startListening() {
-        GlobalScope.launch { listen() }
+    fun startListening(deviceName: String) {
+        GlobalScope.launch { listen(deviceName) }
     }
 
     fun shutdown() {
@@ -37,8 +37,8 @@ class ClipboardHandler(
         cont.resume(stub.getServerInformation(Empty.newBuilder().build()))
     }
 
-    private suspend fun listen() {
-        val register = Message.Register.newBuilder().setName("OnePlus").build()
+    private suspend fun listen(deviceName: String) {
+        val register = Message.Register.newBuilder().setName(deviceName).build()
         stub.streamOutClipboard(register).forEachRemaining {
             listener?.receivedClip(it)
         }
