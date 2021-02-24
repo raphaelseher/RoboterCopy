@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -29,7 +30,12 @@ class HomeFragment : Fragment() {
                               savedInstanceState: Bundle?): View {
         val binding: FragmentHomeBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_home,
             container, false)
+        binding.lifecycleOwner = this
         binding.viewModel = viewModel
+        binding.presenter = Presenter(
+            onClickConnect = { viewModel.onClickConnect() },
+            onClickChangeServer = { showServerSelectionModal() }
+        )
         return binding.root
     }
 
@@ -42,4 +48,13 @@ class HomeFragment : Fragment() {
             Log.d("HomeFragment", "Servers changed: $it")
         }
     }
+
+    private fun showServerSelectionModal() {
+        Toast.makeText(requireContext(), "Server selection modal", Toast.LENGTH_SHORT).show()
+    }
+
+    class Presenter(
+        val onClickConnect: () -> Unit,
+        val onClickChangeServer: () -> Unit
+    )
 }

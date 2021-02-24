@@ -5,6 +5,10 @@
         <variable
             name="viewModel"
             type="com.example.myapplication.screens.home.HomeViewModel" />
+
+        <variable
+            name="presenter"
+            type="com.example.myapplication.screens.home.HomeFragment.Presenter" />
     </data>
 
     <ScrollView
@@ -43,6 +47,7 @@
                         android:text="@={viewModel.deviceName}" />
 
                 </com.google.android.material.textfield.TextInputLayout>
+
             </LinearLayout>
 
             <LinearLayout
@@ -90,7 +95,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/double_standard"
-                    android:text="HostName" />
+                    android:text="@{viewModel.server.name}" />
 
                 <TextView
                     style="@style/Theme.MyApplication.CardRow.Title"
@@ -103,7 +108,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/double_standard"
-                    android:text="IP-Address" />
+                    android:text="@{viewModel.server.discoverdAdress}" />
 
                 <TextView
                     style="@style/Theme.MyApplication.CardRow.Title"
@@ -116,8 +121,27 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/double_standard"
-                    android:text="Port" />
+                    android:text="@{String.valueOf(viewModel.server.port)}" />
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Connect"
+                        android:onClick="@{ () -> presenter.onClickConnect.invoke() }"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Change Server"
+                        android:onClick="@{ () -> presenter.onClickChangeServer.invoke() }"/>
+
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
