@@ -23,6 +23,9 @@ class CopyRepository: CopyServiceManager.Listener {
         servers.postValue(copyServiceManager?.discoveredServers)
     }
 
+    override fun clippingsChanged() {
+    }
+
     override fun connectionChanged() {
         isConnected.value = copyServiceManager?.isConnected ?: false
     }

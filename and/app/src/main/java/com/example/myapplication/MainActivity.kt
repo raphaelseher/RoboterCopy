@@ -36,10 +36,6 @@ class MainActivity : AppCompatActivity() {
             val copyBinder = binder as CopyService.CopyBinder
 
             AppEnvironment.copyRepository.copyServiceManager = copyBinder.getManager()
-
-            copyBinder.receivedClipListener = {
-                Toast.makeText(baseContext, it.content, Toast.LENGTH_SHORT).show()
-            }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {

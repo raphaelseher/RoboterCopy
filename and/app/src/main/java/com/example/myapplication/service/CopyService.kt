@@ -1,6 +1,8 @@
 package com.example.myapplication.service
 
 import android.app.*
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.nsd.NsdManager
@@ -16,7 +18,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.properties.Delegates
 
-class CopyServiceManager {
+class CopyServiceManager(
+    private val clipboardManager: ClipboardManager
+) {
     data class Server(
         val name: String,
         val discoveredAddress: String,
@@ -25,6 +29,7 @@ class CopyServiceManager {
 
     interface Listener {
         fun discoveredServersChanged()
+        fun clippingsChanged()
         fun connectionChanged()
     }
 
@@ -34,6 +39,7 @@ class CopyServiceManager {
     }
 
     val discoveredServers = mutableListOf<Server>()
+    val clippings = mutableListOf<Message.Clipping>()
     var listener: Listener? = null
     var actionDelegate: Actions? = null
     var isConnected: Boolean by Delegates.observable(false) {
@@ -50,8 +56,25 @@ class CopyServiceManager {
         listener?.discoveredServersChanged()
     }
 
+    fun receivedClip(clipping: Message.Clipping) {
+        if (clippings.lastOrNull() == clipping) {
+            return
+        }
+        clippings.add(clipping)
+        listener?.clippingsChanged()
+        addToClipboard(clipping)
+    }
+
+    // ACTIONS
     fun connectToServer(server: Server, deviceName: String) {
         actionDelegate?.connectServer(server, deviceName)
+    }
+
+    private fun addToClipboard(clipping: Message.Clipping) {
+        Log.i("ClipboardManager", "Add to primaryClipboard: ${clipping.content}")
+        ClipData.newPlainText("text", clipping.content).also {
+            clipboardManager.setPrimaryClip(it)
+        }
     }
 }
 
@@ -60,11 +83,10 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
     val TAG = this.javaClass.simpleName
 
     inner class CopyBinder: Binder() {
-        var receivedClipListener: ((clip: Message.Clipping) -> Unit)? = null
         fun getManager(): CopyServiceManager = manager
     }
 
-    private val manager = CopyServiceManager().also { it.actionDelegate = this }
+    private lateinit var manager: CopyServiceManager
     private var copyBinder = CopyBinder()
     private lateinit var discoveryService: DiscoveryService
     private var clipboardHandler: ClipboardHandler? by Delegates.observable(null) {
@@ -79,6 +101,9 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
     override fun onCreate() {
         discoveryService = DiscoveryService(getSystemService(Context.NSD_SERVICE) as NsdManager)
         discoveryService.listener = this
+
+        val test = this.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        manager = CopyServiceManager(test).also { it.actionDelegate = this }
         super.onCreate()
     }
 
@@ -151,7 +176,7 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
     }
 
     override fun receivedClip(clip: Message.Clipping) {
-        copyBinder.receivedClipListener?.invoke(clip)
+        manager.receivedClip(clip)
     }
 
     override fun connectServer(server: CopyServiceManager.Server, deviceName: String) {
