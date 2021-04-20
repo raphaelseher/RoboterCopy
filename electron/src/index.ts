@@ -8,6 +8,7 @@ import ClipboardProvider from './data/clipboardProvider';
 import ClipboardListener from './common/clipboardListener';
 import { bindAndStartServer } from './service/clipboardServer';
 import { findIpAddresses, createServiceBroadcast } from './common/networkHelper';
+import Logger, { LogLevel, ConsoleLogger } from './common/logger';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
@@ -41,7 +42,11 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 const onReadyInitializion = (): void => {
+  Logger.registerLogger(LogLevel.Verbose, new ConsoleLogger());
+  Logger.verbose("Did setup Logger");
+
   createWindow();
+
   clipboardListener = new ClipboardListener(clipboardProvider);
   clipboardListener.startClipboardListener();
 
