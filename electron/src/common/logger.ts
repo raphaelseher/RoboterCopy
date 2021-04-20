@@ -57,4 +57,17 @@ export class ConsoleLogger implements ILogger {
     }
 }
 
+export type ObservableLoggerCallback = (level: string, message: string) => void
+export class ObservableLogger implements ILogger {
+    private observer: ObservableLoggerCallback; 
+    
+    constructor(observer: ObservableLoggerCallback) {
+        this.observer = observer;
+    }
+
+    logMessage = (level: string, message: string) => {    
+        this.observer(level, message);
+    }
+}
+
 export default Logger;

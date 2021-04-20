@@ -16,6 +16,7 @@ class ClipBoardProvider implements IClipboardProvider {
   ) { }
 
   addClipping = (content: string) => {
+    // TODO: @raphi only compare to last element here
     if (this.clippings.includes(content)) {
       return
     }

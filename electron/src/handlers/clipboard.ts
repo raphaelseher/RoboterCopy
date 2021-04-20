@@ -4,6 +4,7 @@ import { Empty } from 'google-protobuf/google/protobuf/empty_pb';
 import { Clipping, Register, ServerInformation } from '../proto/message/message_pb';
 import { IClipboardServer } from '../proto/message/message_grpc_pb';
 import IClipboardProvider from '../data/clipboardProvider';
+import Logger from '../common/logger';
 
 export class ClipboardHandler implements IClipboardServer {
   peers: Map<String, grpc.ServerWritableStream<Register, Clipping>>;
@@ -18,8 +19,8 @@ export class ClipboardHandler implements IClipboardServer {
     const lastClip = new Clipping();
     lastClip.setContent(clippings[clippings.length - 1]);
 
-    console.log('[ClipboardHandler] send clipping: ', lastClip.getContent());
-    console.log('[ClipboardHandler] to ', this.peers.keys);
+    Logger.verbose(`send clipping: ${lastClip.getContent()}`);
+    Logger.verbose(`to ${this.peers.keys}`);
     this.peers.forEach(call => {
       call.write(lastClip);
     });

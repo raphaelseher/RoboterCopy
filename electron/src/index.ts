@@ -8,7 +8,7 @@ import ClipboardProvider from './data/clipboardProvider';
 import ClipboardListener from './common/clipboardListener';
 import { bindAndStartServer } from './service/clipboardServer';
 import { findIpAddresses, createServiceBroadcast } from './common/networkHelper';
-import Logger, { LogLevel, ConsoleLogger } from './common/logger';
+import Logger, { LogLevel, ConsoleLogger, ObservableLogger } from './common/logger';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
@@ -31,6 +31,7 @@ const appState: IState = {
 }
 
 const clipboardProvider = new ClipboardProvider();
+
 let clipboardListener: ClipboardListener | undefined = undefined;
 let mainWindow: BrowserWindow;
 let server: grpc.Server | undefined = undefined;
@@ -42,10 +43,14 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 const onReadyInitializion = (): void => {
-  Logger.registerLogger(LogLevel.Verbose, new ConsoleLogger());
-  Logger.verbose("Did setup Logger");
-
   createWindow();
+
+  Logger.registerLogger(LogLevel.Verbose, new ConsoleLogger());
+  const observerableLoggerCallback = (level: string, message: string) => {
+    mainWindow.webContents.send('new-log', `[${level}] ${message}`);
+  }
+  Logger.registerLogger(LogLevel.Verbose, new ObservableLogger(observerableLoggerCallback));
+  Logger.verbose("Did setup Logger");
 
   clipboardListener = new ClipboardListener(clipboardProvider);
   clipboardListener.startClipboardListener();
@@ -73,7 +78,7 @@ const createWindow = (): void => {
     height: 600,
     width: 800,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
     }
   });
 
@@ -106,8 +111,10 @@ ipcMain.on('toggle-server', () => {
     server.forceShutdown();
     appState.serverIsRunning = false;
     propagateAppState();
+    Logger.verbose('Server stopped');
   } else {
     startServer();
+    Logger.verbose('Server started');
   }
 });
 
