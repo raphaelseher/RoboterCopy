@@ -19,8 +19,7 @@ export class ClipboardHandler implements IClipboardServer {
     const lastClip = new Clipping();
     lastClip.setContent(clippings[clippings.length - 1]);
 
-    Logger.verbose(`send clipping: ${lastClip.getContent()}`);
-    Logger.verbose(`to ${this.peers.keys}`);
+    Logger.verbose(`send clipping: "${lastClip.getContent()}" to ${Array.from(this.peers.keys()).join(', ')}`);
     this.peers.forEach(call => {
       call.write(lastClip);
     });

@@ -1,5 +1,3 @@
-import { kDNSServiceFlagsIndeterminate } from "mdns";
-
 export enum LogLevel {
     Error,
     Warning,
@@ -12,6 +10,9 @@ interface ILogger {
     logMessage: (level: string, message: string) => void;
 }
 
+/*
+ * Logger for main process, does not work in render process.
+ */
 abstract class Logger {
     private static loggers: Map<number, ILogger[]> = new Map<LogLevel, ILogger[]>();
 
