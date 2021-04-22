@@ -53,7 +53,7 @@
               "entryPoints": [
                 {
                   "html": "./src/index.html",
-                  "js": "./src/renderer.ts",
+                  "js": "./src/app.tsx",
                   "name": "main_window"
                 }
               ]
@@ -90,12 +90,20 @@
     "webpack-node-externals": "^2.5.2"
   },
   "dependencies": {
+    "@babel/core": "^7.13.16",
+    "@babel/preset-env": "^7.13.15",
+    "@babel/preset-react": "^7.13.13",
+    "@types/react": "^17.0.3",
+    "@types/react-dom": "^17.0.3",
+    "babel-loader": "^8.2.2",
     "clipboard-event": "^1.5.0",
     "clipboardy": "^2.3.0",
     "dotenv": "^8.2.0",
     "electron-squirrel-startup": "^1.0.0",
     "google-protobuf": "^3.14.0",
     "grpc": "^1.24.4",
-    "mdns": "^2.7.2"
+    "mdns": "^2.7.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
   }
 }

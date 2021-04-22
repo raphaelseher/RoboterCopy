@@ -11,8 +11,14 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "downlevelIteration": true,
+    "noEmit": true,
+    "jsx": "react",
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "paths": {
-      "*": ["node_modules/*"]
+      "*": [
+        "node_modules/*"
+      ]
     }
   },
   "include": [
