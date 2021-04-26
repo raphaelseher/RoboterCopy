@@ -108,7 +108,7 @@ const peersChanged = (peers: string[]) => {
 /// ipc interaction
 ipcMain.on('toggle-server', () => {
   if (appState.serverIsRunning) {
-    server.forceShutdown();
+    server?.forceShutdown();
     appState.serverIsRunning = false;
     propagateAppState();
     Logger.verbose('Server stopped');
