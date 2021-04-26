@@ -14,7 +14,7 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 
 protoIndex();
 
-interface IState {
+export interface IState {
   hostname: string,
   ipAddresses: string[],
   port: number,

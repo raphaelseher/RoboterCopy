@@ -11,7 +11,7 @@ interface ILogger {
 }
 
 /*
- * Logger for main process, does not work in render process.
+ * Logger for main, does not work in render loop.
  */
 abstract class Logger {
     private static loggers: Map<number, ILogger[]> = new Map<LogLevel, ILogger[]>();
@@ -26,7 +26,7 @@ abstract class Logger {
     })();
 
     static registerLogger = (logLevel: LogLevel, logger: ILogger) => {
-        const tempLoggers = Logger.loggers.get(logLevel);
+        const tempLoggers = Logger.loggers.get(logLevel) ?? [];
         tempLoggers.push(logger);
         Logger.loggers.set(logLevel, tempLoggers)
     }
@@ -43,7 +43,7 @@ abstract class Logger {
             if (!isNaN(levelNumber)) {
                 if (levelNumber <= logLevel) {
                     const logLevelString = LogLevel[levelNumber];
-                    Logger.loggers.get(levelNumber).forEach(logger => {
+                    (Logger.loggers.get(levelNumber) ?? []).forEach(logger => {
                         logger.logMessage(logLevelString, message);
                     });
                 }
