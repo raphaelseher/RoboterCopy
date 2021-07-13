@@ -17,10 +17,9 @@ type StartServerType = (
 export const createServer: StartServerType = (
   port: number,
   clipboardProvider: ClipboardProvider,
-  startCallback: StartServerCallback,
-  peersChangedCallback: PeersChangedCallback): grpc.Server => {
+  startCallback: StartServerCallback): grpc.Server => {
   const server: grpc.Server = new grpc.Server();
-  const clipboardHandler = new ClipboardHandler(clipboardProvider, peersChangedCallback);
+  const clipboardHandler = new ClipboardHandler(clipboardProvider);
 
   server.addService<IClipboardServer>(ClipboardService, clipboardHandler);
 

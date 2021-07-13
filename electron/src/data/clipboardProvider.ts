@@ -1,35 +1,54 @@
 export interface IClipboardProvider {
-  serverName: string;
-  ipAdresses: string[];
-  port: number;
+    serverName: string;
+    ipAdresses: string[];
+    port: number;
+    peersChangedCallback: (peers: string[]) => void;
+    peerAddedCallback: (id: string, name: string) => void;
 }
 
-type ClippingsCallback = (clippings: string[]) => void
-class ClipBoardProvider implements IClipboardProvider {
-  clippingsListeners: ClippingsCallback[] = [];
-  protected clippings: string[] = [];
+export interface IClient {
+    id: string;
+    name: string;
+}
 
-  constructor(
-    public serverName: string = '',
-    public ipAdresses: string[] = [],
-    public port: number = 0,
-  ) { }
+type ClippingsCallback = (clippings: string[]) => void;
+type ClientsChangedCallback = (clients: IClient[]) => void;
+export class ClipboardProvider implements IClipboardProvider {
+    public clippingsListeners: ClippingsCallback[] = [];
+    public clientsListener: ClientsChangedCallback;
+    protected clippings: string[] = [];
+    protected clients: IClient[] = [];
 
-  addClipping = (content: string) => {
-    // TODO: @raphi only compare to last element here
-    if (this.clippings.includes(content)) {
-      return
+    constructor(
+        public serverName: string = '',
+        public ipAdresses: string[] = [],
+        public port: number = 0,
+    ) {}
+
+    public peersChangedCallback = (peers: string[]) => {
+
     }
 
-    this.clippings.push(content);
-    this.notifyListeners();
-  }
+    public peerAddedCallback = (id: string, name: string) => {
+        this.clients.push({id: id, name: name}); 
+        this.clientsListener(this.clients); 
+    }
 
-  notifyListeners = () => {
-    this.clippingsListeners.forEach(listener => {
-      listener(this.clippings);
-    });
-  }
+    addClipping = (content: string) => {
+        // TODO: @raphi only compare to last element here
+        if (this.clippings.includes(content)) {
+            return
+        }
+
+        this.clippings.push(content);
+        this.notifyListeners();
+    }
+
+    notifyListeners = () => {
+        this.clippingsListeners.forEach(listener => {
+            listener(this.clippings);
+        });
+    }
 }
 
-export default ClipBoardProvider;
+export default ClipboardProvider;
