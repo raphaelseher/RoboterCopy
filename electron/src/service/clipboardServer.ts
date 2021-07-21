@@ -1,46 +1,91 @@
 import * as grpc from 'grpc';
-
-import { ClipboardHandler } from '../handlers/clipboard';
+import { ServerInformation, Clipping } from 'src/proto/message/message_pb';
+import { ClipboardHandler, IClipboardHandlerDelegate } from '../handlers/clipboard';
 import { IClipboardServer, ClipboardService } from '../proto/message/message_grpc_pb';
-import ClipboardProvider from '../data/clipboardProvider';
+import ServerDataHandler from '../data/serverDataHandler';
 
 type StartServerCallback = (error: Error | null) => void;
 type PeersChangedCallback = (peers: string[]) => void;
 
-type StartServerType = (
-  port: number,
-  clipboardProvider: ClipboardProvider,
-  startCallback: StartServerCallback,
-  peersChangedCallback: PeersChangedCallback
-) => grpc.Server;
+class ClipboardServer implements IClipboardHandlerDelegate {
+  public isRunning = false;
 
-export const createServer: StartServerType = (
-  port: number,
-  clipboardProvider: ClipboardProvider,
-  startCallback: StartServerCallback): grpc.Server => {
-  const server: grpc.Server = new grpc.Server();
-  const clipboardHandler = new ClipboardHandler(clipboardProvider);
+  private grpcServer: grpc.Server;
 
-  server.addService<IClipboardServer>(ClipboardService, clipboardHandler);
+  private serverDataHandler: ServerDataHandler;
 
-  server.bindAsync(
-    `0.0.0.0:${port}`,
-    grpc.ServerCredentials.createInsecure(),
-    (err: Error | null, _: number) => {
-      startCallback(err);
-    },
-  );
+  private clipboardHandler: ClipboardHandler;
 
-  return server;
-};
+  constructor(
+    port: number,
+    serverDataHandler: ServerDataHandler,
+    startCallback: StartServerCallback,
+    peersChangedCallback: PeersChangedCallback,
+  ) {
+    this.serverDataHandler = serverDataHandler;
+    serverDataHandler.clippingsListeners.push(this.clippingsListener);
+    this.clipboardHandler = new ClipboardHandler(this);
+    this.bindAndStartServer(port, this.clipboardHandler, startCallback);
+  }
 
-export const bindAndStartServer = (
-  port: number,
-  clipboardProvider: ClipboardProvider,
-  startCallback: StartServerCallback,
-  peersChangedCallback: PeersChangedCallback
-): grpc.Server => {
-  const server = createServer(port, clipboardProvider, startCallback, peersChangedCallback);
-  server.start();
-  return server;
-};
+  // move serverDataHandler functionality here and remove from handler
+
+  // ServerDataHandler
+  requestServerInformation = (): ServerInformation => {
+    const information = new ServerInformation();
+    information.setName(this.serverDataHandler.serverName);
+    information.setPort(this.serverDataHandler.port);
+    information.setIpaddressesList(this.serverDataHandler.ipAdresses);
+    return information;
+  }
+
+  clientConnected = (uuid: string, name: string) => {
+    this.serverDataHandler.addClient(uuid, name);
+  }
+
+  receivedClipping = (data: string) => {
+    this.serverDataHandler.addClipping(data);
+  }
+
+  clippingsListener: ClippingsCallback = (clippings: string[]) => {
+    const lastClipping = clippings.slice(-1)[0];
+    if (!lastClipping) return;
+
+    const clipping = new Clipping();
+    clipping.setDate('2021-01-01'); // TODO: add correct date
+    clipping.setContent(lastClipping);
+    this.serverDataHandler.clients.forEach((client) => {
+      const call = this.clipboardHandler.getCallForPeer(client.id);
+      call?.write(clipping);
+    });
+  }
+
+  // Server state handling
+  private bindAndStartServer(
+    port: number,
+    clipboardHandler: ClipboardHandler,
+    startCallback: StartServerCallback,
+  ) {
+    this.grpcServer = ClipboardServer.createServer(clipboardHandler);
+    this.grpcServer.bindAsync(
+      `0.0.0.0:${port}`,
+      grpc.ServerCredentials.createInsecure(),
+      (err: Error | null, _: number) => {
+        this.isRunning = err == null;
+        startCallback(err);
+      },
+    );
+
+    this.grpcServer.start();
+  }
+
+  private static createServer(
+    handler: ClipboardHandler,
+  ): grpc.Server {
+    const server: grpc.Server = new grpc.Server();
+    server.addService<IClipboardServer>(ClipboardService, handler);
+    return server;
+  }
+}
+
+export default ClipboardServer;

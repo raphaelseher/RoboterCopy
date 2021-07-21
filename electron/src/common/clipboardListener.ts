@@ -1,16 +1,15 @@
 import * as clipboard from 'clipboardy';
-import IClipboardProvider from '../data/clipboardProvider';
+import { IServerDataHandler } from '../data/clipboardProvider';
 
 class ClipboardListener {
-
   interval: NodeJS.Timeout | undefined
 
-  constructor(protected provider: IClipboardProvider) {
+  constructor(protected provider: IServerDataHandler) {
     provider.clippingsListeners.push(this.clipboardListener);
   }
 
   startClipboardListener = () => {
-    let lastClipboard: string | undefined = undefined
+    let lastClipboard: string | undefined;
 
     this.interval = setInterval(() => {
       const clipboardData = clipboard.readSync();
@@ -19,7 +18,6 @@ class ClipboardListener {
         this.provider.addClipping(clipboardData);
       }
     }, 1000);
-
   };
 
   stopClipboardListener = () => {

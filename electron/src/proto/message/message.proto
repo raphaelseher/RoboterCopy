@@ -10,7 +10,6 @@ service Clipboard {
     rpc GetServerInformation(google.protobuf.Empty) returns (ServerInformation) {}
     rpc StreamOutClipboard(Register) returns (stream Clipping) {}
     rpc StreamInClipboard(stream Clipping) returns (google.protobuf.Empty) {}
-
 }
 
 message ServerInformation {
