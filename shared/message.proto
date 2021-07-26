@@ -4,9 +4,12 @@ package RoboterCopy;
 
 option java_package = "com.example.myapplication.Service";
 
+import "google/protobuf/empty.proto";
+
 service Clipboard {
-    rpc GetServerInformation(VoidRequest) returns (ServerInformation) {}
-    rpc ClipboardStream(stream Clipping) returns (stream Clipping) {}
+    rpc GetServerInformation(google.protobuf.Empty) returns (ServerInformation) {}
+    rpc StreamOutClipboard(Register) returns (stream Clipping) {}
+    rpc StreamInClipboard(stream Clipping) returns (google.protobuf.Empty) {}
 }
 
 message ServerInformation {
@@ -20,10 +23,6 @@ message Clipping {
     string content = 2;
 }
 
-message RegisterRequest {
+message Register {
     string name = 1;
-}
-
-message VoidRequest {
-
 }

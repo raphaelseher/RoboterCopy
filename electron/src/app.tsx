@@ -39,6 +39,7 @@ const ServerControl: React.FC<ServerControlProps> = (props) => (
     </button>
     <p>
       Server is
+      {' '}
       {props.isRunning ? 'running' : 'stopped'}
     </p>
   </div>
@@ -55,7 +56,7 @@ const ClientList: React.FC<ClientListProps> = (props) => {
       { props.clients.map((client, index) => (
         <li key={index}>
           <span>{client.name}</span>
-          <a href="#" onClick={() => { disconnect(client.id); }}>Disconnect</a>
+          <a href="#" onClick={() => { disconnect(client.id); }}> Disconnect</a>
         </li>
       ))}
     </ul>
