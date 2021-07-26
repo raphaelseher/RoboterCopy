@@ -3,16 +3,21 @@ export interface IClient {
     name: string;
 }
 
-type ClippingsCallback = (clippings: string[]) => void;
-type ClientsChangedCallback = (clients: IClient[]) => void;
-export class ServerDataHandler {
+export interface ClippingsCallback {
+  (clippings: string[]) : void;
+}
+export interface ClientsChangedCallback {
+  (clients: IClient[]) : void
+}
+
+class ServerDataHandler {
   public clippingsListeners: ClippingsCallback[] = [];
 
   public clientsListener: ClientsChangedCallback | undefined;
 
   protected clippings: string[] = [];
 
-  protected clients: IClient[] = [];
+  public clients: IClient[] = [];
 
   constructor(
       public serverName: string = '',
@@ -24,26 +29,26 @@ export class ServerDataHandler {
     this.port = port;
   }
 
-  public addClient = (id: string, name: string) => {
-    this.clients.push({ id, name });
-    this.clientsListener?.(this.clients);
-  }
-
-  public addClipping = (content: string) => {
-    // TODO: @raphi only compare to last element here
-    if (this.clippings.includes(content)) {
-      return;
+    public addClient = (id: string, name: string) => {
+      this.clients.push({ id, name });
+      this.clientsListener?.(this.clients);
     }
 
-    this.clippings.push(content);
-    this.notifyListeners();
-  }
+    public addClipping = (content: string) => {
+      // TODO: @raphi only compare to last element here
+      if (this.clippings.includes(content)) {
+        return;
+      }
 
-  notifyListeners = () => {
-    this.clippingsListeners.forEach((listener) => {
-      listener(this.clippings);
-    });
-  }
+      this.clippings.push(content);
+      this.notifyListeners();
+    }
+
+    notifyListeners = () => {
+      this.clippingsListeners.forEach((listener) => {
+        listener(this.clippings);
+      });
+    }
 }
 
-export default ClientsChangedCallback;
+export default ServerDataHandler;

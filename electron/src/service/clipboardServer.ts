@@ -2,7 +2,7 @@ import * as grpc from 'grpc';
 import { ServerInformation, Clipping } from 'src/proto/message/message_pb';
 import { ClipboardHandler, IClipboardHandlerDelegate } from '../handlers/clipboard';
 import { IClipboardServer, ClipboardService } from '../proto/message/message_grpc_pb';
-import ServerDataHandler from '../data/serverDataHandler';
+import ServerDataHandler, { IClient, ClippingsCallback } from '../data/serverDataHandler';
 
 type StartServerCallback = (error: Error | null) => void;
 type PeersChangedCallback = (peers: string[]) => void;
@@ -23,12 +23,10 @@ class ClipboardServer implements IClipboardHandlerDelegate {
     peersChangedCallback: PeersChangedCallback,
   ) {
     this.serverDataHandler = serverDataHandler;
-    serverDataHandler.clippingsListeners.push(this.clippingsListener);
+    this.serverDataHandler.clippingsListeners.push(this.clippingsListener);
     this.clipboardHandler = new ClipboardHandler(this);
     this.bindAndStartServer(port, this.clipboardHandler, startCallback);
   }
-
-  // move serverDataHandler functionality here and remove from handler
 
   // ServerDataHandler
   requestServerInformation = (): ServerInformation => {
@@ -54,7 +52,7 @@ class ClipboardServer implements IClipboardHandlerDelegate {
     const clipping = new Clipping();
     clipping.setDate('2021-01-01'); // TODO: add correct date
     clipping.setContent(lastClipping);
-    this.serverDataHandler.clients.forEach((client) => {
+    this.serverDataHandler.clients.forEach((client: IClient) => {
       const call = this.clipboardHandler.getCallForPeer(client.id);
       call?.write(clipping);
     });
