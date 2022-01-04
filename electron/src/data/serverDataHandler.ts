@@ -14,10 +14,10 @@ class ServerDataHandler {
   public clippingsListeners: ClippingsCallback[] = [];
 
   public clientsListener: ClientsChangedCallback | undefined;
-
+  
   protected clippings: string[] = [];
 
-  public clients: IClient[] = [];
+  private clientMap: Map<string, IClient> = new Map();
 
   constructor(
       public serverName: string = '',
@@ -29,26 +29,33 @@ class ServerDataHandler {
     this.port = port;
   }
 
-    public addClient = (id: string, name: string) => {
-      this.clients.push({ id, name });
-      this.clientsListener?.(this.clients);
+  public addClient = (id: string, name: string) => {
+    this.clientMap.set(id, { id, name });
+    this.clientsListener?.(Array.from(this.clientMap.values()));
+  }
+
+  public removeClient = (id: string) => {
+    this.clientMap.delete(id);
+    this.clientsListener?.(Array.from(this.clientMap.values()));
+  }
+
+  public addClipping = (content: string) => {
+    // TODO: @raphi only compare to last element here
+    if (this.clippings.includes(content)) {
+      return;
     }
 
-    public addClipping = (content: string) => {
-      // TODO: @raphi only compare to last element here
-      if (this.clippings.includes(content)) {
-        return;
-      }
+    this.clippings.push(content);
+    this.notifyListeners();
+  }
 
-      this.clippings.push(content);
-      this.notifyListeners();
-    }
+  public getClientMap = (): Map<string, IClient> => this.clientMap;
 
-    notifyListeners = () => {
-      this.clippingsListeners.forEach((listener) => {
-        listener(this.clippings);
-      });
-    }
+  notifyListeners = () => {
+    this.clippingsListeners.forEach((listener) => {
+      listener(this.clippings);
+    });
+  }
 }
 
 export default ServerDataHandler;

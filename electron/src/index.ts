@@ -4,7 +4,7 @@ import * as grpc from 'grpc';
 import mdns from 'mdns';
 import { protoIndex } from './proto';
 
-import { ClipboardProvider, IClient, ServerDataHandler } from './data/serverDataHandler';
+import ServerDataHandler, { ClipboardProvider, IClient } from './data/serverDataHandler';
 import ClipboardListener from './common/clipboardListener';
 import ClipboardServer from './service/clipboardServer';
 import { findIpAddresses, createServiceBroadcast } from './common/networkHelper';
@@ -125,6 +125,9 @@ ipcMain.on('toggle-server', () => {
   }
 });
 
+ipcMain.on('disconnect-client', (_, id: string) => {
+  server?.disconnectClient(id);
+});
 /// AppState
 
 app.on('ready', onReadyInitializion);

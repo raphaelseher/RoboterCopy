@@ -48,7 +48,7 @@ const ServerControl: React.FC<ServerControlProps> = (props) => (
 type ClientListProps = { clients: IClient[] }
 const ClientList: React.FC<ClientListProps> = (props) => {
   const disconnect = (id: string) => {
-    console.log(`Disconnect id: ${id}`);
+    ipcRenderer.send('disconnect-client', id);
   };
 
   return (

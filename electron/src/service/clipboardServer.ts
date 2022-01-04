@@ -23,9 +23,15 @@ class ClipboardServer implements IClipboardHandlerDelegate {
     peersChangedCallback: PeersChangedCallback,
   ) {
     this.serverDataHandler = serverDataHandler;
-    this.serverDataHandler.clippingsListeners.push(this.clippingsListener);
+    serverDataHandler.clippingsListeners.push(this.clippingsListener);
     this.clipboardHandler = new ClipboardHandler(this);
     this.bindAndStartServer(port, this.clipboardHandler, startCallback);
+  }
+
+  public disconnectClient = (uuid: string) => {
+    const call = this.clipboardHandler.getCallForPeer(uuid);
+    call?.end();
+    this.serverDataHandler.removeClient(uuid);
   }
 
   // ServerDataHandler
@@ -52,8 +58,8 @@ class ClipboardServer implements IClipboardHandlerDelegate {
     const clipping = new Clipping();
     clipping.setDate('2021-01-01'); // TODO: add correct date
     clipping.setContent(lastClipping);
-    this.serverDataHandler.clients.forEach((client: IClient) => {
-      const call = this.clipboardHandler.getCallForPeer(client.id);
+    this.serverDataHandler.getClientMap().forEach((_: IClient, id: string) => {
+      const call = this.clipboardHandler.getCallForPeer(id);
       call?.write(clipping);
     });
   }

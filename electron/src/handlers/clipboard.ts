@@ -21,8 +21,8 @@ export class ClipboardHandler implements IClipboardServer {
     this.delegate = delegate;
   }
 
-  getCallForPeer = (uuid: string):
-  grpc.ServerWritableStream<Register, Clipping> | undefined => this.peers.get(uuid);
+  public getCallForPeer = (uuid: string): 
+    grpc.ServerWritableStream<Register, Clipping> | undefined => this.peers.get(uuid);
 
   getServerInformation = (
     call: grpc.ServerUnaryCall<Empty>,
@@ -56,6 +56,7 @@ export class ClipboardHandler implements IClipboardServer {
     callback: grpc.sendUnaryData<DisconnectResponse>,
   ): void => {
     const response = undefined;
+    console.log("DisconnectClient");
   }
 }
 
