@@ -19,14 +19,19 @@ class CopyRepository: CopyServiceManager.Listener {
         }
     }
 
+    fun disconnectServer() {
+        copyServiceManager?.disconnectServer()
+    }
+
     override fun discoveredServersChanged() {
         servers.postValue(copyServiceManager?.discoveredServers)
     }
 
     override fun clippingsChanged() {
+
     }
 
     override fun connectionChanged() {
-        isConnected.value = copyServiceManager?.isConnected ?: false
+        isConnected.postValue(copyServiceManager?.isConnected ?: false)
     }
 }

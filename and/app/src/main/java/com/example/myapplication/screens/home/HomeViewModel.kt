@@ -31,18 +31,20 @@ class HomeViewModel(
     }
 
     fun onClickConnect() {
-        // TODO: Add disconnect
-        // TODO: Change server
-        selectedServer.value = server.value
+        if (copyRepository.isConnected.value == true) {
+            copyRepository.disconnectServer();
+        } else {
+            selectedServer.value = server.value
 
-        val server = selectedServer.value ?: return
-        val deviceName = deviceName.value ?: return
-        copyRepository.copyServiceManager?.connectToServer(server, deviceName)
+            val server = selectedServer.value ?: return
+            val deviceName = deviceName.value ?: return
+            copyRepository.copyServiceManager?.connectToServer(server, deviceName)
+        }
+        // TODO: Change server
     }
 
     override fun copyServiceConnected(manager: CopyServiceManager) {
         Log.d("Tag", "copyServiceConnected $manager")
     }
-
 
 }

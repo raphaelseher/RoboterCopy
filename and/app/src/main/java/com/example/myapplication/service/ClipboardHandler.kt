@@ -1,5 +1,6 @@
 package com.example.myapplication.service
 
+import android.util.Log
 import com.example.myapplication.Service.ClipboardGrpc
 import com.example.myapplication.Service.Message
 import com.google.protobuf.Empty
@@ -42,9 +43,11 @@ class ClipboardHandler(
         stub.streamOutClipboard(register).forEachRemaining {
             listener?.receivedClip(it)
         }
+        listener?.serverDisconnected()
     }
 
     interface Listener {
         fun receivedClip(clip: Message.Clipping)
+        fun serverDisconnected()
     }
 }

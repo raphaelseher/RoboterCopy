@@ -70,6 +70,10 @@ class CopyServiceManager(
         actionDelegate?.connectServer(server, deviceName)
     }
 
+    fun disconnectServer() {
+        actionDelegate?.disconnect()
+    }
+
     private fun addToClipboard(clipping: Message.Clipping) {
         Log.i("ClipboardManager", "Add to primaryClipboard: ${clipping.content}")
         ClipData.newPlainText("text", clipping.content).also {
@@ -179,12 +183,16 @@ class CopyService: Service(), DiscoveryService.Callback, ClipboardHandler.Listen
         manager.receivedClip(clip)
     }
 
+    override fun serverDisconnected() {
+        disconnect()
+    }
+
     override fun connectServer(server: CopyServiceManager.Server, deviceName: String) {
         connectToServer(server.discoveredAddress, server.port, deviceName)
     }
 
     override fun disconnect() {
-        // clipboardHandler.channel.shutdown()
+        clipboardHandler?.shutdown()
         clipboardHandler = null
         updateNotification(false)
     }
