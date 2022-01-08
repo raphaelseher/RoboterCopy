@@ -3,26 +3,19 @@ export interface IClient {
     name: string;
 }
 
-export interface ClippingsCallback {
-  (clippings: string[]) : void;
-}
 export interface ClientsChangedCallback {
   (clients: IClient[]) : void
 }
 
-class ServerDataHandler {
-  public clippingsListeners: ClippingsCallback[] = [];
-
+class ServerRepository {
   public clientsListener: ClientsChangedCallback | undefined;
   
-  protected clippings: string[] = [];
-
   private clientMap: Map<string, IClient> = new Map();
 
   constructor(
-      public serverName: string = '',
-      public ipAdresses: string[] = [],
-      public port: number = 0,
+      private serverName: string = '',
+      private ipAdresses: string[] = [],
+      private port: number = 0,
   ) {
     this.serverName = serverName;
     this.ipAdresses = ipAdresses;
@@ -39,23 +32,11 @@ class ServerDataHandler {
     this.clientsListener?.(Array.from(this.clientMap.values()));
   }
 
-  public addClipping = (content: string) => {
-    // TODO: @raphi only compare to last element here
-    if (this.clippings.includes(content)) {
-      return;
-    }
-
-    this.clippings.push(content);
-    this.notifyListeners();
-  }
-
   public getClientMap = (): Map<string, IClient> => this.clientMap;
-
-  notifyListeners = () => {
-    this.clippingsListeners.forEach((listener) => {
-      listener(this.clippings);
-    });
-  }
+  
+  public getServerName = () => this.serverName;
+  public getIpAdresses = () => this.ipAdresses;
+  public getPort = () => this.port;
 }
 
-export default ServerDataHandler;
+export default ServerRepository;

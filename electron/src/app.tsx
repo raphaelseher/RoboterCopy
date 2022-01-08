@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import './index.css';
 import { IState } from './index';
 import Logs from './components/logs/logs';
-import { IClient } from './data/serverDataHandler';
+import { IClient } from './data/serverRepository';
 
 type ServerInformationProps = { state: IState }
 const ServerInformation: React.FC<ServerInformationProps> = (props) => (

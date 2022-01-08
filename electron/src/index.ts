@@ -1,12 +1,12 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import os from 'os';
-import * as grpc from 'grpc';
 import mdns from 'mdns';
 import { protoIndex } from './proto';
 
-import ServerDataHandler, { ClipboardProvider, IClient } from './data/serverDataHandler';
+import ServerRepository, { IClient } from './data/serverRepository';
+import ClippingsRepository from './data/clippingRepository';
 import ClipboardListener from './common/clipboardListener';
-import ClipboardServer from './service/clipboardServer';
+import RemoteCopyServer from './service/remoteCopyServer';
 import { findIpAddresses, createServiceBroadcast } from './common/networkHelper';
 import Logger, { LogLevel, ConsoleLogger, ObservableLogger } from './common/logger';
 
@@ -30,11 +30,12 @@ const appState: IState = {
   connectedDevices: [],
 };
 
-const serverDataHandler = new ServerDataHandler();
+const serverRepository = new ServerRepository(appState.hostname, appState.ipAddresses, appState.port);
+const clippingsRepository = new ClippingsRepository();
 
 let clipboardListener: ClipboardListener | undefined;
 let mainWindow: BrowserWindow;
-let server: ClipboardServer | undefined;
+let clipboardService: RemoteCopyServer | undefined;
 const serverAdvertisment: mdns.Advertisement = createServiceBroadcast(appState.port);
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -63,7 +64,7 @@ const createWindow = (): void => {
   mainWindow.webContents.openDevTools();
 };
 
-const peersChanged = (peers: string[]) => {
+const peersChanged = (peers: IClient[]) => {
   appState.connectedDevices = peers;
   propagateAppState();
 };
@@ -73,7 +74,7 @@ const peersAdded = (id: string, name: string) => {
 };
 
 const startServer = () => {
-  server = new ClipboardServer(appState.port, serverDataHandler, (error) => {
+  clipboardService = new RemoteCopyServer(appState.port, serverRepository,clippingsRepository, (error) => {
     if (error) {
       console.log('Error: ', error);
       return;
@@ -93,13 +94,10 @@ const onReadyInitializion = (): void => {
   Logger.registerLogger(LogLevel.Verbose, new ObservableLogger(observerableLoggerCallback));
   Logger.verbose('Did setup Logger');
 
-  clipboardListener = new ClipboardListener(serverDataHandler);
+  clipboardListener = new ClipboardListener(clippingsRepository);
   clipboardListener.startClipboardListener();
 
-  serverDataHandler.ipAdresses = appState.ipAddresses;
-  serverDataHandler.port = appState.port;
-  serverDataHandler.serverName = os.hostname();
-  serverDataHandler.clientsListener = (clients: IClient[]) => {
+  serverRepository.clientsListener = (clients: IClient[]) => {
     appState.connectedDevices = clients;
     propagateAppState();
   };
@@ -126,7 +124,7 @@ ipcMain.on('toggle-server', () => {
 });
 
 ipcMain.on('disconnect-client', (_, id: string) => {
-  server?.disconnectClient(id);
+  clipboardService?.disconnectClient(id);
 });
 /// AppState
 

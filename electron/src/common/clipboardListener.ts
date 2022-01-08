@@ -1,11 +1,11 @@
 import * as clipboard from 'clipboardy';
-import { IServerDataHandler } from '../data/clipboardProvider';
+import ClippingsRepository from '../data/clippingRepository';
 
 class ClipboardListener {
   interval: NodeJS.Timeout | undefined
 
-  constructor(protected provider: IServerDataHandler) {
-    provider.clippingsListeners.push(this.clipboardListener);
+  constructor(protected repo: ClippingsRepository) {
+    repo.clippingsListeners.push(this.clipboardListener);
   }
 
   startClipboardListener = () => {
@@ -15,7 +15,7 @@ class ClipboardListener {
       const clipboardData = clipboard.readSync();
       if (lastClipboard !== clipboardData) {
         lastClipboard = clipboardData;
-        this.provider.addClipping(clipboardData);
+        this.repo.addClipping(clipboardData);
       }
     }, 1000);
   };

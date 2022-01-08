@@ -1,54 +1,52 @@
 import * as grpc from 'grpc';
 import { ServerInformation, Clipping } from 'src/proto/message/message_pb';
-import { ClipboardHandler, IClipboardHandlerDelegate } from '../handlers/clipboard';
+import { ClipboardHandler, IClipboardHandlerDelegate } from '../handlers/clipboardHandler';
 import { IClipboardServer, ClipboardService } from '../proto/message/message_grpc_pb';
-import ServerDataHandler, { IClient, ClippingsCallback } from '../data/serverDataHandler';
+import ServerRepository, { IClient, } from '../data/serverRepository';
+import ClippingsRepository, { ClippingsCallback }  from 'src/data/clippingRepository';
 
 type StartServerCallback = (error: Error | null) => void;
-type PeersChangedCallback = (peers: string[]) => void;
+type PeersChangedCallback = (peers: IClient[]) => void;
 
-class ClipboardServer implements IClipboardHandlerDelegate {
+class RemoteCopyServer implements IClipboardHandlerDelegate {
   public isRunning = false;
 
   private grpcServer: grpc.Server;
 
-  private serverDataHandler: ServerDataHandler;
-
-  private clipboardHandler: ClipboardHandler;
+  private grpcClipboardHandler: ClipboardHandler;
 
   constructor(
     port: number,
-    serverDataHandler: ServerDataHandler,
+    private serverRepository: ServerRepository,
+    private clippingsRepository: ClippingsRepository,
     startCallback: StartServerCallback,
     peersChangedCallback: PeersChangedCallback,
   ) {
-    this.serverDataHandler = serverDataHandler;
-    serverDataHandler.clippingsListeners.push(this.clippingsListener);
-    this.clipboardHandler = new ClipboardHandler(this);
-    this.bindAndStartServer(port, this.clipboardHandler, startCallback);
+    clippingsRepository.clippingsListeners.push(this.clippingsListener);
+    this.grpcClipboardHandler = new ClipboardHandler(this);
+    this.bindAndStartServer(port, this.grpcClipboardHandler, startCallback);
   }
 
   public disconnectClient = (uuid: string) => {
-    const call = this.clipboardHandler.getCallForPeer(uuid);
+    const call = this.grpcClipboardHandler.getCallForPeer(uuid);
     call?.end();
-    this.serverDataHandler.removeClient(uuid);
+    this.serverRepository.removeClient(uuid);
   }
 
-  // ServerDataHandler
   requestServerInformation = (): ServerInformation => {
     const information = new ServerInformation();
-    information.setName(this.serverDataHandler.serverName);
-    information.setPort(this.serverDataHandler.port);
-    information.setIpaddressesList(this.serverDataHandler.ipAdresses);
+    information.setName(this.serverRepository.getServerName());
+    information.setPort(this.serverRepository.getPort());
+    information.setIpaddressesList(this.serverRepository.getIpAdresses());
     return information;
   }
 
   clientConnected = (uuid: string, name: string) => {
-    this.serverDataHandler.addClient(uuid, name);
+    this.serverRepository.addClient(uuid, name);
   }
 
   receivedClipping = (data: string) => {
-    this.serverDataHandler.addClipping(data);
+    this.clippingsRepository.addClipping(data);
   }
 
   clippingsListener: ClippingsCallback = (clippings: string[]) => {
@@ -58,8 +56,8 @@ class ClipboardServer implements IClipboardHandlerDelegate {
     const clipping = new Clipping();
     clipping.setDate('2021-01-01'); // TODO: add correct date
     clipping.setContent(lastClipping);
-    this.serverDataHandler.getClientMap().forEach((_: IClient, id: string) => {
-      const call = this.clipboardHandler.getCallForPeer(id);
+    this.serverRepository.getClientMap().forEach((_: IClient, id: string) => {
+      const call = this.grpcClipboardHandler.getCallForPeer(id);
       call?.write(clipping);
     });
   }
@@ -70,7 +68,7 @@ class ClipboardServer implements IClipboardHandlerDelegate {
     clipboardHandler: ClipboardHandler,
     startCallback: StartServerCallback,
   ) {
-    this.grpcServer = ClipboardServer.createServer(clipboardHandler);
+    this.grpcServer = RemoteCopyServer.createServer(clipboardHandler);
     this.grpcServer.bindAsync(
       `0.0.0.0:${port}`,
       grpc.ServerCredentials.createInsecure(),
@@ -92,4 +90,4 @@ class ClipboardServer implements IClipboardHandlerDelegate {
   }
 }
 
-export default ClipboardServer;
+export default RemoteCopyServer;
