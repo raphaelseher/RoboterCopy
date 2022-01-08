@@ -1,8 +1,8 @@
-import * as clipboard from 'clipboardy';
-import ClippingsRepository from '../data/clippingRepository';
+import * as clipboard from "clipboardy";
+import ClippingsRepository from "../data/clippingRepository";
 
 class ClipboardListener {
-  interval: NodeJS.Timeout | undefined
+  interval: NodeJS.Timeout | undefined;
 
   constructor(protected repo: ClippingsRepository) {
     repo.clippingsListeners.push(this.clipboardListener);
@@ -22,15 +22,14 @@ class ClipboardListener {
 
   stopClipboardListener = () => {
     this.interval ? clearInterval(this.interval) : null;
-  }
+  };
 
   clipboardListener = (clippings: string[]) => {
     const currentClipboard = clipboard.readSync();
     if (currentClipboard !== clippings[clippings.length - 1]) {
-      console.log('New clipping synced to mac');
       clipboard.write(clippings[clippings.length - 1]);
     }
-  }
+  };
 }
 
 export default ClipboardListener;

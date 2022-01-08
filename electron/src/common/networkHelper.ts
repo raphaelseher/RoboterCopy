@@ -1,5 +1,4 @@
 import * as os from "os";
-import mdns from "mdns";
 
 export const findIpAddresses = (): string[] => {
   const interfaces = os.networkInterfaces();
@@ -16,11 +15,4 @@ export const findIpAddresses = (): string[] => {
   }
 
   return results;
-};
-
-export const createServiceBroadcast = (port: number): mdns.Advertisement => {
-  const serviceType = mdns.makeServiceType("roco", "tcp");
-  return mdns.createAdvertisement(mdns.tcp("http"), port, {
-    name: "RoboterCopy",
-  });
 };
