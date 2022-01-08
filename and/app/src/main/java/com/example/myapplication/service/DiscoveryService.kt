@@ -64,7 +64,7 @@ class DiscoveryService(val nsdManager: NsdManager) {
     }
 
     companion object {
-        const val NSD_SERVICE_TYPE = "_roco._tcp."
+        const val NSD_SERVICE_TYPE = "_http._tcp."
         const val ROBOCOPY_SERVICE_NAME = "RoboterCopy"
     }
 }
